@@ -4,6 +4,7 @@ import br.com.cgv.orders.dto.OrderDTO;
 import br.com.cgv.orders.dto.StatusDto;
 import br.com.cgv.orders.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,42 +24,46 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderControllers {
 
-        @Autowired
-        private OrderService service;
+    @Autowired
+    private OrderService service;
 
-        @GetMapping()
-        public List<OrderDTO> listAll() {
-            return service.listaAll();
-        }
+    @GetMapping()
+    public List<OrderDTO> listAll() {
+        return service.listaAll();
+    }
 
-        @GetMapping("/{id}")
-        public ResponseEntity<OrderDTO> findById(@PathVariable @NotNull Long id) {
-            OrderDTO dto = service.findById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDTO> findById(@PathVariable @NotNull Long id) {
+        OrderDTO dto = service.findById(id);
 
-            return  ResponseEntity.ok(dto);
-        }
+        return  ResponseEntity.ok(dto);
+    }
 
-        @PostMapping()
-        public ResponseEntity<OrderDTO> placeOrder(@RequestBody @Valid OrderDTO dto, UriComponentsBuilder uriBuilder) {
-            OrderDTO orderPlaced = service.create(dto);
+    @PostMapping()
+    public ResponseEntity<OrderDTO> placeOrder(@RequestBody @Valid OrderDTO dto, UriComponentsBuilder uriBuilder) {
+        OrderDTO orderPlaced = service.create(dto);
 
-            URI uri = uriBuilder.path("/orders/{id}").buildAndExpand(orderPlaced.getId()).toUri();
+        URI uri = uriBuilder.path("/orders/{id}").buildAndExpand(orderPlaced.getId()).toUri();
 
-            return ResponseEntity.created(uri).body(orderPlaced);
-        }
+        return ResponseEntity.created(uri).body(orderPlaced);
+    }
 
-        @PutMapping("/{id}/status")
-        public ResponseEntity<OrderDTO> updateStatus(@PathVariable Long id, @RequestBody StatusDto status){
-           OrderDTO dto = service.update(id, status);
+    @PutMapping("/{id}/status")
+    public ResponseEntity<OrderDTO> updateStatus(@PathVariable Long id, @RequestBody StatusDto status){
+       OrderDTO dto = service.update(id, status);
 
-            return ResponseEntity.ok(dto);
-        }
+        return ResponseEntity.ok(dto);
+    }
 
 
-        @PutMapping("/{id}/paid")
-        public ResponseEntity<Void> approvePayment(@PathVariable @NotNull Long id) {
-            service.approvePaymentOrder(id);
-            return ResponseEntity.ok().build();
+    @PutMapping("/{id}/paid")
+    public ResponseEntity<Void> approvePayment(@PathVariable @NotNull Long id) {
+        service.approvePaymentOrder(id);
+        return ResponseEntity.ok().build();
+    }
 
-        }
+    @GetMapping("/port")
+    public String getPort(@Value("${local.server.port}") String port){
+        return String.format("Request answered by instance executing on port %s", port);
+    }
 }
